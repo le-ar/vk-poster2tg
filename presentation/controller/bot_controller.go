@@ -2,6 +2,8 @@ package controller
 
 import (
 	"math/rand"
+	"net/http"
+	"os"
 	"sort"
 	"time"
 	"vk-poster2tg/cores"
@@ -25,6 +27,15 @@ func InitBot(getAllPostsFromVkPoster *usecase.GetAllPostsFromVkPoster, sendPostT
 }
 
 func (botController *BotController) StartBot() {
+
+	go func() {
+		port := os.Getenv("PORT")
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Hello World!"))
+		})
+		http.ListenAndServe(":"+port, nil)
+	}()
+
 	rand.Seed(time.Now().UnixNano())
 	lastUpdate := int64(0)
 	for {
