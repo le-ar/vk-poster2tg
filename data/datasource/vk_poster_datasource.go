@@ -9,6 +9,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strconv"
+	"strings"
 	"vk-poster2tg/cores"
 	"vk-poster2tg/data/model"
 )
@@ -19,15 +20,17 @@ type VkPosterDatasource interface {
 }
 
 type VkPosterDatasourceImpl struct {
-	Client *http.Client
+	Client   *http.Client
+	email    string
+	password string
 }
 
-func AuthVkPoster(appConfig *cores.AppSettings) *VkPosterDatasourceImpl {
+func (vkPosterDataSource *VkPosterDatasourceImpl) auth() {
 	cookieJar, _ := cookiejar.New(nil)
 	client := http.Client{
 		Jar: cookieJar,
 	}
-	resp, err := client.PostForm("http://vk-poster.ru/core/login.php", url.Values{"email": {appConfig.Email}, "password": {appConfig.Password}})
+	resp, err := client.PostForm("http://vk-poster.ru/core/login.php", url.Values{"email": {vkPosterDataSource.email}, "password": {vkPosterDataSource.password}})
 	fmt.Println(err)
 
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
@@ -36,10 +39,18 @@ func AuthVkPoster(appConfig *cores.AppSettings) *VkPosterDatasourceImpl {
 	}
 	fmt.Println(string(bodyBytes), err)
 	resp.Body.Close()
+	vkPosterDataSource.Client = &client
+}
 
-	return &VkPosterDatasourceImpl{
-		Client: &client,
+func AuthVkPoster(appConfig *cores.AppSettings) *VkPosterDatasourceImpl {
+	vkPosterDataSource := &VkPosterDatasourceImpl{
+		email:    appConfig.Email,
+		password: appConfig.Password,
 	}
+
+	vkPosterDataSource.auth()
+
+	return vkPosterDataSource
 }
 
 func (vkPosterDatasource *VkPosterDatasourceImpl) GetPosts() []*model.VkPostModel {
@@ -70,6 +81,11 @@ func (vkPosterDatasource *VkPosterDatasourceImpl) GetPosts() []*model.VkPostMode
 		}
 		resp.Body.Close()
 
+		if strings.Contains(string(bodyBytes), "\"error_code\":1") {
+			vkPosterDatasource.auth()
+			return vkPosterDatasource.GetPosts()
+		}
+
 		var posts []map[string]interface{}
 
 		if err = json.Unmarshal(bodyBytes, &posts); err == nil {
@@ -87,9 +103,24 @@ func (vkPosterDatasource *VkPosterDatasourceImpl) GetPosts() []*model.VkPostMode
 }
 
 func (vkPosterDatasource *VkPosterDatasourceImpl) RemovePost(post *model.VkPostModel) {
-	vkPosterDatasource.Client.PostForm("http://vk-poster.ru/core/feed/post_delete.php", url.Values{
+	resp, err := vkPosterDatasource.Client.PostForm("http://vk-poster.ru/core/feed/post_delete.php", url.Values{
 		"msg":     {post.ID},
 		"tabWall": {"grabberwall"},
 		"set":     {"2"},
 	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	resp.Body.Close()
+
+	if strings.Contains(string(bodyBytes), "\"error_code\":1") {
+		vkPosterDatasource.auth()
+		vkPosterDatasource.RemovePost(post)
+	}
 }

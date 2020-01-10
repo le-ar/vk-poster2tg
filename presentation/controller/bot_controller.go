@@ -53,7 +53,7 @@ func (botController *BotController) StartBot() {
 
 			botController.removePostFromVkPoster.Execute(post)
 
-			time.Sleep(time.Minute * (30 + time.Duration(rand.Int63n(30))))
+			time.Sleep(time.Minute * time.Duration(int64(30)+(rand.Int63n(30))))
 		}
 	}
 }
