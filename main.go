@@ -2,26 +2,39 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"net/url"
-	"vk-poser2tg/data/datasource"
+	"vk-poster2tg/cores"
+	"vk-poster2tg/data/datasource"
+	"vk-poster2tg/data/repository"
+	"vk-poster2tg/domain/usecase"
+
+	"go.uber.org/dig"
 )
 
+func BuildContainer() *dig.Container {
+	container := dig.New()
+
+	container.Provide(cores.ReadOrInit)
+	container.Provide(datasource.AuthVkPoster)
+	container.Provide(func(authVkPoster *datasource.VkPosterDatasourceImpl) *repository.VkPosterRepositoryImpl {
+		return &repository.VkPosterRepositoryImpl{
+			VkPosterDatasource: authVkPoster,
+		}
+	})
+	container.Provide(func(vkPosterRepositoryImpl *repository.VkPosterRepositoryImpl) *usecase.GetAllPostsFromVkPoster {
+		return &usecase.GetAllPostsFromVkPoster{
+			Repository: vkPosterRepositoryImpl,
+		}
+	})
+
+	return container
+}
+
 func main() {
-	client := http.Client{}
-	vkPosterDatasource := datasource.VkPosterDatasourceImpl{
-		Client: &client,
-	}
-	fmt.Println(vkPosterDatasource)
-	resp, err := client.PostForm("http://vk-poster.ru/core/login.php", url.Values{"email": {"malmuk2013@gmail.com"}, "password": {"Leoon2000"}})
+	container := BuildContainer()
 
-	fmt.Println(err)
-
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(bodyBytes), err)
+	fmt.Println(container.Invoke(func(getAllPostsFromVkPoster *usecase.GetAllPostsFromVkPoster) {
+		fmt.Println(3)
+		fmt.Println(getAllPostsFromVkPoster.Execute())
+		fmt.Println(2)
+	}))
 }
