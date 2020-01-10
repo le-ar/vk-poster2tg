@@ -32,6 +32,11 @@ func BuildContainer() *dig.Container {
 			Repository: vkPosterRepositoryImpl,
 		}
 	})
+	container.Provide(func(vkPosterRepositoryImpl *repository.VkPosterRepositoryImpl) *usecase.RemovePostFromVkPoster {
+		return &usecase.RemovePostFromVkPoster{
+			Repository: vkPosterRepositoryImpl,
+		}
+	})
 	container.Provide(func(tgRepositoryImpl *repository.TgRepositoryImpl) *usecase.SendPostToTgChannel {
 		return &usecase.SendPostToTgChannel{
 			Repository: tgRepositoryImpl,

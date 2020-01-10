@@ -12,3 +12,7 @@ type VkPosterRepositoryImpl struct {
 func (vkPosterRepositoryImpl *VkPosterRepositoryImpl) GetPosts() []*model.VkPostModel {
 	return vkPosterRepositoryImpl.VkPosterDatasource.GetPosts()
 }
+
+func (vkPosterRepositoryImpl *VkPosterRepositoryImpl) RemovePost(post *model.VkPostModel) {
+	vkPosterRepositoryImpl.VkPosterDatasource.RemovePost(post)
+}

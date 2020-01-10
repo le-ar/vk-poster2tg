@@ -15,6 +15,7 @@ import (
 
 type VkPosterDatasource interface {
 	GetPosts() []*model.VkPostModel
+	RemovePost(post *model.VkPostModel)
 }
 
 type VkPosterDatasourceImpl struct {
@@ -83,4 +84,12 @@ func (vkPosterDatasource *VkPosterDatasourceImpl) GetPosts() []*model.VkPostMode
 			return resultPosts
 		}
 	}
+}
+
+func (vkPosterDatasource *VkPosterDatasourceImpl) RemovePost(post *model.VkPostModel) {
+	vkPosterDatasource.Client.PostForm("http://vk-poster.ru/core/feed/post_delete.php", url.Values{
+		"msg":     {post.ID},
+		"tabWall": {"grabberwall"},
+		"set":     {"2"},
+	})
 }

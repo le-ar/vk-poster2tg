@@ -9,13 +9,15 @@ import (
 )
 
 type BotController struct {
+	removePostFromVkPoster  *usecase.RemovePostFromVkPoster
 	getAllPostsFromVkPoster *usecase.GetAllPostsFromVkPoster
 	sendPostToTgChannel     *usecase.SendPostToTgChannel
 	sortBy                  string // "IA" or "Percent" Default - Percent
 }
 
-func InitBot(getAllPostsFromVkPoster *usecase.GetAllPostsFromVkPoster, sendPostToTgChannel *usecase.SendPostToTgChannel, appConfig *cores.AppSettings) *BotController {
+func InitBot(getAllPostsFromVkPoster *usecase.GetAllPostsFromVkPoster, sendPostToTgChannel *usecase.SendPostToTgChannel, removePostFromVkPoster *usecase.RemovePostFromVkPoster, appConfig *cores.AppSettings) *BotController {
 	return &BotController{
+		removePostFromVkPoster:  removePostFromVkPoster,
 		getAllPostsFromVkPoster: getAllPostsFromVkPoster,
 		sendPostToTgChannel:     sendPostToTgChannel,
 		sortBy:                  appConfig.SortPostsBy,
@@ -48,6 +50,8 @@ func (botController *BotController) StartBot() {
 
 		for _, post := range priorityPosts {
 			botController.sendPostToTgChannel.Execute(post)
+
+			botController.removePostFromVkPoster.Execute(post)
 
 			time.Sleep(time.Minute * (30 + time.Duration(rand.Int63n(30))))
 		}

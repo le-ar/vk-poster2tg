@@ -8,6 +8,7 @@ import (
 )
 
 type VkPostModel struct {
+	ID       string
 	Text     string
 	Images   []*url.URL
 	IA       float64
@@ -29,6 +30,7 @@ func VkPostModelFromInterface(parsed map[string]interface{}) (*VkPostModel, erro
 	percents, _ := strconv.Atoi(strings.Split(parsed["ia_view"].(string)[:len(parsed["ia_view"].(string))-2], "(")[1])
 
 	return &VkPostModel{
+		ID:       parsed["id"].(string),
 		Text:     parsed["message"].(string),
 		Images:   photos,
 		IA:       ia,
