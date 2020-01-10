@@ -67,8 +67,8 @@ func InitAppSetting() *AppSettings {
 
 	fmt.Print("Enter api token for telegram bot: ")
 	tgApi, _ := reader.ReadString('\n')
-	password = strings.Replace(password, "\n", "", -1)
-	password = strings.Replace(password, "\r", "", -1)
+	tgApi = strings.Replace(tgApi, "\n", "", -1)
+	tgApi = strings.Replace(tgApi, "\r", "", -1)
 
 	fmt.Print("Enter telegram channel name: ")
 	channelName, _ := reader.ReadString('\n')
