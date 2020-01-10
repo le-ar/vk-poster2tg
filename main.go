@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"net/url"
 	"vk-poster2tg/cores"
 	"vk-poster2tg/data/datasource"
-	"vk-poster2tg/data/model"
 	"vk-poster2tg/data/repository"
 	"vk-poster2tg/domain/usecase"
+	"vk-poster2tg/presentation/controller"
 
 	"go.uber.org/dig"
 )
@@ -38,6 +37,7 @@ func BuildContainer() *dig.Container {
 			Repository: tgRepositoryImpl,
 		}
 	})
+	container.Provide(controller.InitBot)
 
 	return container
 }
@@ -51,38 +51,11 @@ func main() {
 	// 	fmt.Println(2)
 	// }))
 
-	fmt.Println(container.Invoke(func(sendPostToTgChannel *usecase.SendPostToTgChannel) {
+	fmt.Println(container.Invoke(func(botController *controller.BotController) {
 		fmt.Println(3)
 
-		urlPhoto, _ := url.Parse("https://icatcare.org/app/uploads/2018/07/Thinking-of-getting-a-cat.png")
+		botController.StartBot()
 
-		sendPostToTgChannel.Execute(&model.VkPostModel{
-			Text: "Hello",
-		})
-		sendPostToTgChannel.Execute(&model.VkPostModel{
-			Text: "Hello",
-			Images: []*url.URL{
-				urlPhoto,
-			},
-		})
-		sendPostToTgChannel.Execute(&model.VkPostModel{
-			Text: "Hello",
-			Images: []*url.URL{
-				urlPhoto,
-				urlPhoto,
-			},
-		})
-		sendPostToTgChannel.Execute(&model.VkPostModel{
-			Images: []*url.URL{
-				urlPhoto,
-			},
-		})
-		sendPostToTgChannel.Execute(&model.VkPostModel{
-			Images: []*url.URL{
-				urlPhoto,
-				urlPhoto,
-			},
-		})
 		fmt.Println(2)
 	}))
 }

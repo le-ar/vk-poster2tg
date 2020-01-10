@@ -10,10 +10,11 @@ import (
 )
 
 type AppSettings struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	TgApi     string `json:"api_token"`
-	TgChannel string `json:"channel_name"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	TgApi       string `json:"api_token"`
+	TgChannel   string `json:"channel_name"`
+	SortPostsBy string `json:"sort_posts_by"`
 }
 
 func IsSettingsFileExists() bool {
@@ -77,11 +78,20 @@ func InitAppSetting() *AppSettings {
 		channelName = "@" + channelName
 	}
 
+	fmt.Print("Enter posts sort alg (\"IA\" or \"Percent\"): ")
+	sortPostsBy, _ := reader.ReadString('\n')
+	sortPostsBy = strings.Replace(sortPostsBy, "\n", "", -1)
+	sortPostsBy = strings.Replace(sortPostsBy, "\r", "", -1)
+	if channelName[0] != '@' {
+		channelName = "@" + channelName
+	}
+
 	appSettings := AppSettings{
-		Email:     email,
-		Password:  password,
-		TgApi:     tgApi,
-		TgChannel: channelName,
+		Email:       email,
+		Password:    password,
+		TgApi:       tgApi,
+		TgChannel:   channelName,
+		SortPostsBy: sortPostsBy,
 	}
 
 	settingsJson, _ := json.Marshal(appSettings)

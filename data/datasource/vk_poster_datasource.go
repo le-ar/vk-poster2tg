@@ -79,8 +79,6 @@ func (vkPosterDatasource *VkPosterDatasourceImpl) GetPosts() []*model.VkPostMode
 			}
 		}
 
-		log.Println(postsCount)
-
 		if len(posts) < 5 {
 			return resultPosts
 		}

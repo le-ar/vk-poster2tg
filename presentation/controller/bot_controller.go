@@ -9,25 +9,40 @@ import (
 )
 
 type BotController struct {
-	getAllPostsFromVkPoster usecase.GetAllPostsFromVkPoster
-	sendPostToTgChannel     usecase.SendPostToTgChannel
+	getAllPostsFromVkPoster *usecase.GetAllPostsFromVkPoster
+	sendPostToTgChannel     *usecase.SendPostToTgChannel
+	sortBy                  string // "IA" or "Percent" Default - Percent
 }
 
-func InitBot(getAllPostsFromVkPoster usecase.GetAllPostsFromVkPoster, sendPostToTgChannel usecase.SendPostToTgChannel) *BotController {
+func InitBot(getAllPostsFromVkPoster *usecase.GetAllPostsFromVkPoster, sendPostToTgChannel *usecase.SendPostToTgChannel, appConfig *cores.AppSettings) *BotController {
 	return &BotController{
 		getAllPostsFromVkPoster: getAllPostsFromVkPoster,
 		sendPostToTgChannel:     sendPostToTgChannel,
+		sortBy:                  appConfig.SortPostsBy,
 	}
 }
 
-func (botController *BotController) StartBot(appConfig *cores.AppSettings) {
+func (botController *BotController) StartBot() {
 	rand.Seed(time.Now().UnixNano())
+	lastUpdate := int64(0)
 	for {
+		if time.Now().Unix()-lastUpdate < 2000 {
+			time.Sleep(time.Second * time.Duration(time.Now().Unix()-lastUpdate))
+		}
+
 		allPosts := botController.getAllPostsFromVkPoster.Execute()
 
-		sort.Slice(allPosts[:], func(i, j int) bool {
-			return allPosts[i].IA > allPosts[j].IA
-		})
+		lastUpdate = time.Now().Unix()
+
+		if botController.sortBy == "IA" {
+			sort.Slice(allPosts[:], func(i, j int) bool {
+				return allPosts[i].IA > allPosts[j].IA
+			})
+		} else {
+			sort.Slice(allPosts[:], func(i, j int) bool {
+				return allPosts[i].Percents > allPosts[j].Percents
+			})
+		}
 
 		priorityPosts := allPosts[:5]
 

@@ -4,12 +4,14 @@ import (
 	_ "image/jpeg"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type VkPostModel struct {
-	Text   string
-	Images []*url.URL
-	IA     float64
+	Text     string
+	Images   []*url.URL
+	IA       float64
+	Percents int
 }
 
 func VkPostModelFromInterface(parsed map[string]interface{}) (*VkPostModel, error) {
@@ -24,10 +26,12 @@ func VkPostModelFromInterface(parsed map[string]interface{}) (*VkPostModel, erro
 	}
 
 	ia, _ := strconv.ParseFloat(parsed["ia"].(string), 64)
+	percents, _ := strconv.Atoi(strings.Split(parsed["ia_view"].(string)[:len(parsed["ia_view"].(string))-2], "(")[1])
 
 	return &VkPostModel{
-		Text:   parsed["message"].(string),
-		Images: photos,
-		IA:     ia,
+		Text:     parsed["message"].(string),
+		Images:   photos,
+		IA:       ia,
+		Percents: percents,
 	}, nil
 }
