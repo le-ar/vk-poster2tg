@@ -73,6 +73,9 @@ func InitAppSetting() *AppSettings {
 	channelName, _ := reader.ReadString('\n')
 	channelName = strings.Replace(channelName, "\n", "", -1)
 	channelName = strings.Replace(channelName, "\r", "", -1)
+	if channelName[0] != '@' {
+		channelName = "@" + channelName
+	}
 
 	appSettings := AppSettings{
 		Email:     email,
