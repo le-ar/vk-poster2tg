@@ -23,6 +23,19 @@ func IsSettingsFileExists() bool {
 }
 
 func ReadOrInit() *AppSettings {
+	if os.Getenv("email") != "" &&
+		os.Getenv("password") != "" &&
+		os.Getenv("api_token") != "" &&
+		os.Getenv("channel_name") != "" &&
+		os.Getenv("sort_posts_by") != "" {
+		return &AppSettings{
+			Email:       os.Getenv("email"),
+			Password:    os.Getenv("password"),
+			TgApi:       os.Getenv("api_token"),
+			TgChannel:   os.Getenv("channel_name"),
+			SortPostsBy: os.Getenv("sort_posts_by"),
+		}
+	}
 	if IsSettingsFileExists() {
 		conf, err := ReadAppSettingFromFile()
 		if err == nil {
