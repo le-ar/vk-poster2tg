@@ -57,7 +57,10 @@ func (botController *BotController) StartBot() {
 			})
 		}
 
-		priorityPosts := allPosts[:5]
+		priorityPosts := allPosts
+		if len(priorityPosts) > 5 {
+			priorityPosts = priorityPosts[:5]
+		}
 
 		for _, post := range priorityPosts {
 			botController.sendPostToTgChannel.Execute(post)
